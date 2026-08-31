@@ -165,7 +165,9 @@ function applyPreset(key) {
   $('#cfgBaseUrl').value = p.baseUrl;
   if (p.visionModel) $('#cfgVisionModel').value = p.visionModel;
   if (p.textModel) $('#cfgTextModel').value = p.textModel;
-  setStatus('#cfgStatus', `✅ 已套用 ${p.name} 预设${p.tip ? '｜' + p.tip : ''}`, 'ok');
+  toast('✅ 已套用 ' + p.name + ' 预设');
+  const s = document.querySelector('#cfgStatus');
+  if (s) s.textContent = '✅ ' + p.name + (p.tip ? ' ｜ ' + p.tip : '');
 }
 
 function loadCfgToUI() {

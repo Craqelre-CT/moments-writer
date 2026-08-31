@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>朋友圈文案助手 · AI Moments Writer</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <link rel="manifest" href="./manifest.json" />
+</head>
+<body>
+  <div class="app-shell">
+    <!-- 顶部导航 -->
+    <header class="app-header">
+      <div class="brand">
+        <span class="brand-logo">✨</span>
+        <div>
+          <h1>朋友圈文案助手</h1>
+          <p class="brand-sub">AI Moments Writer · 识图 · 画像 · 规划</p>
+        </div>
+      </div>
+      <nav class="tab-nav" id="tabNav">
+        <button class="tab-btn active" data-tab="generate">🎯 生成文案</button>
+        <button class="tab-btn" data-tab="profile">👤 用户画像</button>
+        <button class="tab-btn" data-tab="plan">📅 今日规划</button>
+        <button class="tab-btn" data-tab="settings">⚙️ 配置</button>
+      </nav>
+    </header>
+
+    <!-- 主内容区 -->
+    <main class="app-main">
+
+      <!-- ========== 1. 生成文案 ========== -->
+      <section class="tab-panel active" id="panel-generate">
+        <div class="panel-grid">
+          <!-- 左侧：图片上传 + 识别 -->
+          <div class="card">
+            <h2 class="card-title">① 上传图片 / 图像识别</h2>
+
+            <div class="upload-area" id="uploadArea">
+              <input type="file" id="fileInput" accept="image/*" hidden />
+              <div class="upload-inner">
+                <div class="upload-icon">🖼️</div>
+                <p class="upload-hint">点击或拖拽图片到此处</p>
+                <p class="upload-sub">支持 JPG / PNG / WEBP · 建议小于 5MB</p>
+              </div>
+              <img id="previewImg" alt="预览" />
+            </div>
+
+            <div class="action-row">
+              <button class="btn btn-primary" id="btnRecognize" disabled>🔍 AI 识别图片</button>
+              <button class="btn btn-ghost" id="btnClearImg">🗑️ 清空图片</button>
+            </div>
+
+            <div class="result-box" id="recognizeBox" hidden>
+              <div class="result-label">🧠 识别结果</div>
+              <div id="recognizeText" class="result-text"></div>
+            </div>
+          </div>
+
+          <!-- 右侧：文案生成 -->
+          <div class="card">
+            <h2 class="card-title">② 生成朋友圈文案</h2>
+
+            <label class="field-label">风格 / 关键词（可选）</label>
+            <input type="text" id="styleInput" class="text-input" placeholder="例如：文艺 / 搞笑 / 正能量 / 商务 / 美食博主风..." />
+
+            <label class="field-label">额外补充（可选）</label>
+            <textarea id="extraInput" class="text-input" rows="2" placeholder="例如：周末和闺蜜在三里屯喝咖啡，聊到深夜..."></textarea>
+
+            <div class="action-row">
+              <button class="btn btn-primary" id="btnGenerate">✨ 生成文案（3 条）</button>
+              <span class="status-text" id="genStatus"></span>
+            </div>
+
+            <div class="result-box" id="genBox" hidden>
+              <div class="result-label">📝 候选文案</div>
+              <div id="candidatesList" class="candidates-list"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== 2. 用户画像 ========== -->
+      <section class="tab-panel" id="panel-profile">
+        <div class="card">
+          <h2 class="card-title">👤 用户画像问答</h2>
+          <p class="card-sub">通过几个问题了解你，让 AI 生成更贴合你风格的文案。所有信息仅保存在本地。</p>
+
+          <div class="qa-flow" id="qaFlow">
+            <!-- 问题卡片 -->
+          </div>
+
+          <div class="action-row">
+            <button class="btn btn-ghost" id="btnProfileReset">🔄 重新开始问答</button>
+            <button class="btn btn-outline" id="btnProfileEdit">✏️ 手动编辑画像</button>
+          </div>
+
+          <div class="profile-preview" id="profilePreview" hidden>
+            <div class="result-label">📊 当前用户画像</div>
+            <pre id="profileText" class="profile-text"></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== 3. 今日规划 ========== -->
+      <section class="tab-panel" id="panel-plan">
+        <div class="card">
+          <div class="plan-head">
+            <div>
+              <h2 class="card-title">📅 今日朋友圈规划</h2>
+              <p class="card-sub" id="planDate"></p>
+            </div>
+            <div class="plan-actions">
+              <button class="btn btn-ghost" id="btnClearPlan">🗑️ 清空今日</button>
+            </div>
+          </div>
+
+          <div id="planList" class="plan-list">
+            <!-- 动态生成 -->
+          </div>
+
+          <div class="empty-hint" id="planEmpty">
+            <div class="empty-icon">📭</div>
+            <p>今天还没有规划哦～回到「生成文案」把喜欢的文案添加到今日规划吧！</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== 4. 配置 ========== -->
+      <section class="tab-panel" id="panel-settings">
+        <div class="card">
+          <h2 class="card-title">⚙️ AI 服务配置</h2>
+          <p class="card-sub">本应用基于 OpenAI 兼容协议（Chat Completions + Vision）。可使用 OpenAI、智谱、DeepSeek、Moonshot 等平台的 API Key。密钥仅保存在本地浏览器。</p>
+
+          <label class="field-label">API Base URL</label>
+          <input type="text" id="cfgBaseUrl" class="text-input" placeholder="https://api.openai.com/v1" />
+
+          <label class="field-label">API Key</label>
+          <input type="password" id="cfgApiKey" class="text-input" placeholder="sk-xxxxxxxxxxxxxxxx" />
+
+          <label class="field-label">图像识别模型（支持 vision）</label>
+          <input type="text" id="cfgVisionModel" class="text-input" placeholder="gpt-4o-mini" />
+
+          <label class="field-label">文本生成模型</label>
+          <input type="text" id="cfgTextModel" class="text-input" placeholder="gpt-4o-mini" />
+
+          <div class="action-row">
+            <button class="btn btn-primary" id="btnSaveCfg">💾 保存配置</button>
+            <button class="btn btn-outline" id="btnTestCfg">🧪 测试连接</button>
+            <span class="status-text" id="cfgStatus"></span>
+          </div>
+
+          <div class="tip-box">
+            <strong>💡 使用提示：</strong>
+            <ul>
+              <li>若使用官方 OpenAI：Base URL 默认 <code>https://api.openai.com/v1</code>，模型填 <code>gpt-4o-mini</code></li>
+              <li>若使用智谱：Base URL <code>https://open.bigmodel.cn/api/paas/v4</code>，模型 <code>glm-4v-flash</code>（识别） + <code>glm-4-flash</code>（生成）</li>
+              <li>若使用 DeepSeek：Base URL <code>https://api.deepseek.com/v1</code>（注意：DeepSeek 目前无 vision 模型，图像识别请使用其他平台）</li>
+              <li>若使用 Moonshot：Base URL <code>https://api.moonshot.cn/v1</code>，模型 <code>moonshot-v1-8k</code> 支持图</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <p>💡 所有数据均保存在您的浏览器本地（localStorage），不会上传至任何服务器（除调用您配置的 AI 接口外）。</p>
+    </footer>
+  </div>
+
+  <!-- Toast 提示 -->
+  <div class="toast" id="toast" hidden></div>
+
+  <!-- 加载蒙层 -->
+  <div class="loading-mask" id="loadingMask" hidden>
+    <div class="loading-inner">
+      <div class="spinner"></div>
+      <p id="loadingText">AI 正在思考中...</p>
+    </div>
+  </div>
+
+  <script src="./app.js"></script>
+</body>
+</html>

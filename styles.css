@@ -184,17 +184,22 @@ body::before {
 
 @media (max-width: 480px) {
   html { font-size: 14px; }
-  .app-shell { padding: 12px; }
+  .app-shell { padding: 12px 12px 72px 12px; }
   .app-header { padding: 14px 16px; }
   .card { padding: 18px; }
   .brand h1 { font-size: 17px; }
   .brand-sub { font-size: 12px; }
-  .tab-btn { padding: 9px 14px; font-size: 13px; }
+  .tab-nav { display: none; }
+  .app-footer { padding-bottom: 0; }
   .btn { padding: 11px 16px; font-size: 14px; min-height: 44px; }
   .mini-btn { padding: 8px 12px; font-size: 13px; min-height: 40px; }
   .qa-opt { padding: 9px 12px; font-size: 13px; min-height: 40px; }
   .upload-area { min-height: 200px; }
-  .toast { bottom: 20px; padding: 12px 18px; font-size: 14px; }
+  .toast { bottom: 80px; padding: 12px 18px; font-size: 14px; }
+}
+
+@media (min-width: 481px) {
+  .bottom-tab-bar { display: none; }
 }
 
 @media (hover: none) {
@@ -687,3 +692,46 @@ body::before {
 @keyframes spin { to { transform: rotate(360deg); } }
 
 .loading-inner p { color: var(--c-text); font-weight: 600; margin: 0; }
+
+/* ---------- 移动端底部导航栏 ---------- */
+.bottom-tab-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  display: flex;
+  z-index: 500;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.btb-btn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  cursor: pointer;
+  color: var(--c-text-mute);
+  font-family: inherit;
+  padding: 6px 0;
+  transition: color 0.18s;
+}
+
+.btb-icon { font-size: 22px; line-height: 1; }
+.btb-label { font-size: 11px; font-weight: 500; }
+
+.btb-btn.active {
+  color: var(--c-primary);
+}
+.btb-btn.active .btb-icon {
+  transform: scale(1.1);
+  transition: transform 0.2s;
+}

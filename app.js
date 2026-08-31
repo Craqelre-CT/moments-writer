@@ -762,6 +762,7 @@ function renderPlan() {
    ================================================== */
 function switchTab(name) {
   $$('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+  $$('.btb-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
   $$('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + name));
   if (name === 'plan') renderPlan();
   if (name === 'profile') {
@@ -801,8 +802,11 @@ function switchTab(name) {
    初始化
    ================================================== */
 function init() {
-  // tab nav
+  // tab nav (顶部 + 底部)
   $$('.tab-btn').forEach(b => {
+    b.addEventListener('click', () => switchTab(b.dataset.tab));
+  });
+  $$('.btb-btn').forEach(b => {
     b.addEventListener('click', () => switchTab(b.dataset.tab));
   });
 

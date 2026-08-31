@@ -95,8 +95,53 @@ function fileToBase64(file) {
 }
 
 /* ==================================================
-   配置
+   配置 —— 服务商预设
    ================================================== */
+const PRESETS = {
+  zhipu: {
+    name: '智谱 AI',
+    baseUrl: 'https://open.bigmodel.cn/api/paas/v4',
+    visionModel: 'glm-4v-flash',
+    textModel: 'glm-4-flash',
+    tip: '免费注册即送额度，国内访问稳定',
+  },
+  openai: {
+    name: 'OpenAI',
+    baseUrl: 'https://api.openai.com/v1',
+    visionModel: 'gpt-4o-mini',
+    textModel: 'gpt-4o-mini',
+    tip: '效果最好，需科学上网',
+  },
+  moonshot: {
+    name: 'Moonshot 月之暗面',
+    baseUrl: 'https://api.moonshot.cn/v1',
+    visionModel: 'moonshot-v1-8k-vision-preview',
+    textModel: 'moonshot-v1-8k',
+    tip: '国内平台，支持视觉模型',
+  },
+  qwen: {
+    name: '阿里云 DashScope',
+    baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
+    visionModel: 'qwen-vl-plus',
+    textModel: 'qwen-plus',
+    tip: '通义系列，需在 DashScope 控制台开通',
+  },
+  deepseek: {
+    name: 'DeepSeek',
+    baseUrl: 'https://api.deepseek.com/v1',
+    visionModel: '',
+    textModel: 'deepseek-chat',
+    tip: '⚠️ DeepSeek 目前无 Vision 模型，图片识别需搭配其他平台',
+  },
+  doubao: {
+    name: '豆包 / 火山方舟',
+    baseUrl: 'https://ark.cn-beijing.volces.com/api/v3',
+    visionModel: 'doubao-vision-pro-32k-250115',
+    textModel: 'doubao-pro-32k-250115',
+    tip: '字节跳动出品，需在火山方舟创建推理接入点',
+  },
+};
+
 const DEFAULT_CFG = {
   baseUrl: 'https://api.openai.com/v1',
   apiKey: '',
@@ -106,11 +151,29 @@ const DEFAULT_CFG = {
 
 let cfg = { ...DEFAULT_CFG, ...safeGet(LS.CFG, {}) };
 
+/* 根据当前 cfg 反推最匹配的预设 key（用于回显下拉选中状态） */
+function detectPresetKey() {
+  for (const [k, p] of Object.entries(PRESETS)) {
+    if (cfg.baseUrl === p.baseUrl) return k;
+  }
+  return '';
+}
+
+function applyPreset(key) {
+  const p = PRESETS[key];
+  if (!p) return;
+  $('#cfgBaseUrl').value = p.baseUrl;
+  if (p.visionModel) $('#cfgVisionModel').value = p.visionModel;
+  if (p.textModel) $('#cfgTextModel').value = p.textModel;
+  setStatus('#cfgStatus', `✅ 已套用 ${p.name} 预设${p.tip ? '｜' + p.tip : ''}`, 'ok');
+}
+
 function loadCfgToUI() {
-  $('#cfgBaseUrl').value    = cfg.baseUrl || '';
-  $('#cfgApiKey').value     = cfg.apiKey || '';
+  $('#cfgBaseUrl').value     = cfg.baseUrl || '';
+  $('#cfgApiKey').value      = cfg.apiKey || '';
   $('#cfgVisionModel').value = cfg.visionModel || '';
   $('#cfgTextModel').value   = cfg.textModel || '';
+  $('#cfgPreset').value      = detectPresetKey();
 }
 
 function saveCfgFromUI() {
@@ -828,6 +891,7 @@ function init() {
   loadCfgToUI();
   $('#btnSaveCfg').addEventListener('click', saveCfgFromUI);
   $('#btnTestCfg').addEventListener('click', testCfg);
+  $('#cfgPreset').addEventListener('change', e => applyPreset(e.target.value));
 
   // 图片上传
   setupUpload();

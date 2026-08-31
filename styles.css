@@ -194,6 +194,17 @@ body::before {
   .mini-btn { padding: 8px 12px; font-size: 13px; min-height: 40px; }
   .qa-opt { padding: 9px 12px; font-size: 13px; min-height: 40px; }
   .upload-area { min-height: 200px; }
+  .toast {
+    bottom: auto;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    padding: 12px 22px;
+    font-size: 14px;
+  }
+  @keyframes toastIn {
+    from { opacity: 0; transform: translate(-50%, -40%); }
+    to { opacity: 1; transform: translate(-50%, -50%); }
+  }
 }
 
 @media (hover: none) {

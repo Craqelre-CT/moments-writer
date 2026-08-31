@@ -185,8 +185,23 @@ function saveCfgFromUI() {
   toast('✅ 配置已保存');
 }
 
+/* 自动同步 UI 到 cfg（每次调用 AI 前先执行，避免用户改了输入框但没点保存的情况） */
+function syncCfgFromUI() {
+  // 某些页面可能还没渲染配置面板，用可选链防止报错
+  const base = $('#cfgBaseUrl');
+  const key  = $('#cfgApiKey');
+  const vis  = $('#cfgVisionModel');
+  const txt  = $('#cfgTextModel');
+  if (base) cfg.baseUrl     = base.value.trim() || cfg.baseUrl;
+  if (key)  cfg.apiKey      = key.value.trim();
+  if (vis)  cfg.visionModel = vis.value.trim() || cfg.visionModel;
+  if (txt)  cfg.textModel   = txt.value.trim() || cfg.textModel;
+}
+
 async function testCfg() {
+  syncCfgFromUI();
   if (!cfg.apiKey) { toast('⚠️ 请先填写 API Key'); return; }
+  saveCfgFromUI();
   showLoading('正在测试连接...', $('#btnTestCfg'));
   try {
     const data = await callChat([
@@ -595,6 +610,7 @@ function buildSystemPrompt() {
 }
 
 async function doGenerate() {
+  syncCfgFromUI();
   if (!cfg.apiKey) { toast('⚠️ 请先在「配置」中填入 API Key'); switchTab('settings'); return; }
   const style = $('#styleInput').value.trim();
   const extra = $('#extraInput').value.trim();
@@ -719,6 +735,7 @@ function renderCandidates() {
 }
 
 async function regenerateOne(idx) {
+  syncCfgFromUI();
   if (!cfg.apiKey) { toast('⚠️ 请先配置 API Key'); return; }
   showLoading('重新生成中...', null);
   try {

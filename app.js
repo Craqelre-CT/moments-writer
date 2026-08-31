@@ -43,11 +43,29 @@ function toast(msg, ms = 1800) {
   toast._t = setTimeout(() => (t.hidden = true), ms);
 }
 
-function showLoading(text = 'AI 正在思考中...') {
-  $('#loadingText').textContent = text;
-  $('#loadingMask').hidden = false;
+/* 非阻塞 loading：顶部状态条 + 关联按钮置灰 */
+let loadingTargetBtn = null;
+
+function showLoading(text = 'AI 正在思考中...', btn = null) {
+  const bar = $('#loadingBar');
+  bar.hidden = false;
+  $('#loadingBarText').textContent = text;
+  loadingTargetBtn = btn;
+  if (btn) {
+    btn.disabled = true;
+    btn.dataset.origText = btn.textContent;
+    btn.innerHTML = '<span class="btn-spinner"></span> ' + text;
+  }
 }
-function hideLoading() { $('#loadingMask').hidden = true; }
+function hideLoading() {
+  const bar = $('#loadingBar');
+  bar.hidden = true;
+  if (loadingTargetBtn) {
+    loadingTargetBtn.disabled = false;
+    loadingTargetBtn.textContent = loadingTargetBtn.dataset.origText || loadingTargetBtn.textContent;
+    loadingTargetBtn = null;
+  }
+}
 
 async function copyText(text) {
   try {
@@ -106,7 +124,7 @@ function saveCfgFromUI() {
 
 async function testCfg() {
   if (!cfg.apiKey) { toast('⚠️ 请先填写 API Key'); return; }
-  showLoading('正在测试连接...');
+  showLoading('正在测试连接...', $('#btnTestCfg'));
   try {
     const data = await callChat([
       { role: 'user', content: '请回复"连接成功"四个字。' }
@@ -461,7 +479,7 @@ async function handleFile(file) {
 async function doRecognize() {
   if (!currentImage?.dataUrl) { toast('⚠️ 请先上传图片'); return; }
   if (!cfg.apiKey) { toast('⚠️ 请先在「配置」中填入 API Key'); switchTab('settings'); return; }
-  showLoading('正在识别图片内容...');
+  showLoading('正在识别图片内容...', $('#btnRecognize'));
   try {
     const text = await recognizeImage(currentImage.dataUrl);
     currentImage.recognizeText = text;
@@ -524,7 +542,7 @@ async function doGenerate() {
     return;
   }
 
-  showLoading('正在生成朋友圈文案...');
+  showLoading('正在生成朋友圈文案...', $('#btnGenerate'));
   $('#genStatus').textContent = '';
 
   const userParts = [];
@@ -639,7 +657,7 @@ function renderCandidates() {
 
 async function regenerateOne(idx) {
   if (!cfg.apiKey) { toast('⚠️ 请先配置 API Key'); return; }
-  showLoading('重新生成中...');
+  showLoading('重新生成中...', null);
   try {
     const style = $('#styleInput').value.trim();
     const extra = $('#extraInput').value.trim();

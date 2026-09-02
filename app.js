@@ -261,14 +261,15 @@ function extractText(json) {
 }
 
 // 图像识别（Vision）
-async function recognizeImage(base64DataUrl) {
+async function recognizeImage(base64DataUrl, hint) {
   const url = normalizeBase(cfg.baseUrl) + '/chat/completions';
-  const prompt = `请用中文分析这张图片，输出以下信息：
+  let prompt = `请用中文分析这张图片，输出以下信息：
 1. 【主体】画面里的主要物体/人物/场景是什么；
 2. 【氛围】整体氛围、情绪和风格（例如：温馨、活泼、文艺、商务、高级感、烟火气等）；
 3. 【细节】值得关注的细节元素、颜色、构图；
 4. 【场景推断】这张图片可能拍摄于什么场景下（如：旅行、约会、工作、聚餐、生活随拍等）。
 请用简洁的中文分点回答，便于后续生成朋友圈文案。`;
+  if (hint) prompt = hint + '\n\n' + prompt;
 
   const messages = [
     {
@@ -561,7 +562,8 @@ async function doRecognize() {
   if (!cfg.apiKey) { toast('⚠️ 请先在「配置」中填入 API Key'); switchTab('settings'); return; }
   showLoading('正在识别图片内容...', $('#btnRecognize'));
   try {
-    const text = await recognizeImage(currentImage.dataUrl);
+    const hint = $('#recognizeHint').value.trim();
+    const text = await recognizeImage(currentImage.dataUrl, hint);
     currentImage.recognizeText = text;
     hideLoading();
     $('#recognizeBox').hidden = false;

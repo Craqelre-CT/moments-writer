@@ -101,8 +101,8 @@ const PRESETS = {
   zhipu: {
     name: '智谱 AI',
     baseUrl: 'https://open.bigmodel.cn/api/paas/v4',
-    visionModel: 'glm-4v-flash',
-    textModel: 'glm-4-flash',
+    visionModel: 'glm-4.6v-flash',
+    textModel: 'glm-4.7-flash',
     tip: '免费注册即送额度，国内访问稳定',
   },
   openai: {
@@ -149,7 +149,24 @@ const DEFAULT_CFG = {
   textModel: 'gpt-4o-mini',
 };
 
+/* 配置迁移：智谱已下线 glm-4v-flash / glm-4-flash，自动升级到新版模型名 */
+const MODEL_MIGRATIONS = {
+  'glm-4v-flash': 'glm-4.6v-flash',
+  'glm-4-flash': 'glm-4.7-flash',
+  'glm-4.5-flash': 'glm-4.7-flash',
+  'glm-4.5v-flash': 'glm-4.6v-flash',
+};
+
 let cfg = { ...DEFAULT_CFG, ...safeGet(LS.CFG, {}) };
+if (MODEL_MIGRATIONS[cfg.visionModel]) {
+  cfg.visionModel = MODEL_MIGRATIONS[cfg.visionModel];
+  safeSet(LS.CFG, cfg);
+}
+if (MODEL_MIGRATIONS[cfg.textModel]) {
+  cfg.textModel = MODEL_MIGRATIONS[cfg.textModel];
+  safeSet(LS.CFG, cfg);
+}
+
 
 /* 根据当前 cfg 反推最匹配的预设 key（用于回显下拉选中状态） */
 function detectPresetKey() {
@@ -262,6 +279,9 @@ function extractText(json) {
 
 // 图像识别（Vision）
 async function recognizeImage(base64DataUrl, hint) {
+  if (!cfg.visionModel) {
+    throw new Error('当前预设/配置没有填写视觉模型（Vision Model），请切换到智谱 / Moonshot / 通义 / 豆包 等支持图片识别的服务商。DeepSeek 暂不支持图片识别。');
+  }
   const url = normalizeBase(cfg.baseUrl) + '/chat/completions';
   let prompt = `请用中文分析这张图片，输出以下信息：
 1. 【主体】画面里的主要物体/人物/场景是什么；
@@ -276,7 +296,7 @@ async function recognizeImage(base64DataUrl, hint) {
       role: 'user',
       content: [
         { type: 'text', text: prompt },
-        { type: 'image_url', image_url: { url: base64DataUrl, detail: 'low' } },
+        { type: 'image_url', image_url: { url: base64DataUrl } },
       ],
     },
   ];
@@ -558,6 +578,7 @@ async function handleFile(file) {
 }
 
 async function doRecognize() {
+  syncCfgFromUI();
   if (!currentImage?.dataUrl) { toast('⚠️ 请先上传图片'); return; }
   if (!cfg.apiKey) { toast('⚠️ 请先在「配置」中填入 API Key'); switchTab('settings'); return; }
   showLoading('正在识别图片内容...', $('#btnRecognize'));
